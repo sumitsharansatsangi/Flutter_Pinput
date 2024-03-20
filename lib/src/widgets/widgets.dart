@@ -1,5 +1,7 @@
 part of '../pinput.dart';
 
+/// Signature for a function that creates a widget for a given index, e.g., in a
+/// list.
 typedef JustIndexedWidgetBuilder = Widget Function(int index);
 
 class _PinputFormField extends FormField<String> {
@@ -8,7 +10,6 @@ class _PinputFormField extends FormField<String> {
     required super.enabled,
     required super.initialValue,
     required super.builder,
-    super.key,
   }) : super(
           autovalidateMode: AutovalidateMode.disabled,
         );
@@ -23,7 +24,6 @@ class _SeparatedRaw extends StatelessWidget {
     required this.children,
     required this.mainAxisAlignment,
     this.separatorBuilder,
-    super.key,
   });
 
   @override
