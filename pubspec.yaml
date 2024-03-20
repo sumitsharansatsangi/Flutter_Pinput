@@ -19,17 +19,17 @@ funding:
   - https://ko-fi.com/flutterman
 
 environment:
-  sdk: '>=2.15.0 <4.0.0'
-  flutter: ">=3.7.0"
+  sdk: '>=3.3.1 <4.0.0'
+  flutter: ">=3.19.3"
 
 
 dependencies:
   flutter:
     sdk: flutter
-  smart_auth: ^1.1.1
+  smart_auth: ^2.0.0
   universal_platform: ^1.0.0+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
+  flutter_lints: ^3.0.1

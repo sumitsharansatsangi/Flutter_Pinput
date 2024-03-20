@@ -109,14 +109,13 @@ class Pinput extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20),
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.onTapOutside,
-    Key? key,
+    super.key,
   })  : assert(obscuringCharacter.length == 1),
         assert(length > 0),
         assert(
           textInputAction != TextInputAction.newline,
           'Pinput is not multiline',
-        ),
-        super(key: key);
+        );
 
   /// Theme of the pin in default state
   final PinTheme? defaultPinTheme;
