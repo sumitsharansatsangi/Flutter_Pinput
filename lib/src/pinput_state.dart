@@ -97,7 +97,7 @@ class _PinputState extends State<Pinput>
         widget.androidSmsAutofillMethod != AndroidSmsAutofillMethod.none;
 
     if (isAndroid && isAutofillEnabled) {
-      _smartAuth = SmartAuth();
+      _smartAuth = SmartAuth.instance;
       _maybePrintAppSignature();
       _listenForSmsCode();
     }
@@ -114,14 +114,19 @@ class _PinputState extends State<Pinput>
   void _listenForSmsCode() async {
     final useUserConsentApi = widget.androidSmsAutofillMethod ==
         AndroidSmsAutofillMethod.smsUserConsentApi;
-    final res = await _smartAuth!.getSmsCode(
-      useUserConsentApi: useUserConsentApi,
+
+    final res =
+    useUserConsentApi ? 
+     await _smartAuth!.getSmsWithUserConsentApi(
       matcher: widget.smsCodeMatcher,
       senderPhoneNumber: widget.senderPhoneNumber,
-    );
-    if (res.succeed && res.codeFound && res.code!.length == widget.length) {
-      _effectiveController.setText(res.code!);
+    ): await _smartAuth!.getSmsWithRetrieverApi(
+      matcher: widget.smsCodeMatcher,);
+          if (res.hasData && res.requireData.code != null && res.requireData.code!.length == widget.length) {
+             _effectiveController.setText(res.requireData.code!);
+     res.requireData.code;
     }
+    
     // Listen for multiple sms codes
     if (widget.listenForMultipleSmsOnAndroid) {
       _listenForSmsCode();
@@ -212,7 +217,7 @@ class _PinputState extends State<Pinput>
     widget.controller?.removeListener(_handleTextEditingControllerChanges);
     _focusNode?.dispose();
     _controller?.dispose();
-    _smartAuth?.removeSmsListener();
+    _smartAuth?.removeSmsRetrieverApiListener();
     // https://github.com/Tkko/Flutter_Pinput/issues/89
     _ambiguate(WidgetsBinding.instance)!.removeObserver(this);
     super.dispose();
@@ -457,13 +462,13 @@ class _PinputState extends State<Pinput>
   }
 
   MouseCursor get _effectiveMouseCursor =>
-      MaterialStateProperty.resolveAs<MouseCursor>(
-        widget.mouseCursor ?? MaterialStateMouseCursor.textable,
-        <MaterialState>{
-          if (!isEnabled) MaterialState.disabled,
-          if (_isHovering) MaterialState.hovered,
-          if (effectiveFocusNode.hasFocus) MaterialState.focused,
-          if (hasError) MaterialState.error,
+      WidgetStateProperty.resolveAs<MouseCursor>(
+        widget.mouseCursor ?? WidgetStateMouseCursor.textable,
+        <WidgetState>{
+          if (!isEnabled) WidgetState.disabled,
+          if (_isHovering) WidgetState.hovered,
+          if (effectiveFocusNode.hasFocus) WidgetState.focused,
+          if (hasError) WidgetState.error,
         },
       );
 

@@ -20,13 +20,13 @@ funding:
 
 environment:
   sdk: '>=3.3.1 <4.0.0'
-  flutter: ">=3.19.3"
+  flutter: ">=3.24.3"
 
 
 dependencies:
   flutter:
     sdk: flutter
-  smart_auth: ^2.0.0
+  smart_auth: ^3.0.0
   universal_platform: ^1.0.0+1
 
 dev_dependencies:
