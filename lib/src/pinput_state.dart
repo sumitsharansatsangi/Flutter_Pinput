@@ -33,7 +33,7 @@ class _PinputState extends State<Pinput>
   FocusNode? _focusNode;
   bool _isHovering = false;
   String? _validatorErrorText;
-  SmartAuth? _smartAuth;
+  SmsRetriever? _smsRetriever;
 
   String? get _errorText => widget.errorText ?? _validatorErrorText;
 
@@ -92,43 +92,20 @@ class _PinputState extends State<Pinput>
 
   /// Android Autofill
   void _maybeInitSmartAuth() async {
-    final isAndroid = UniversalPlatform.isAndroid;
-    final isAutofillEnabled =
-        widget.androidSmsAutofillMethod != AndroidSmsAutofillMethod.none;
-
-    if (isAndroid && isAutofillEnabled) {
-      _smartAuth = SmartAuth.instance;
-      _maybePrintAppSignature();
+    if (_smsRetriever == null && widget.smsRetriever != null) {
+      _smsRetriever = widget.smsRetriever!;
       _listenForSmsCode();
     }
   }
 
-  void _maybePrintAppSignature() async {
-    if (widget.androidSmsAutofillMethod ==
-        AndroidSmsAutofillMethod.smsRetrieverApi) {
-      final res = await _smartAuth!.getAppSignature();
-      debugPrint('Pinput: App Signature for SMS Retriever API Is: $res');
-    }
-  }
-
   void _listenForSmsCode() async {
-    final useUserConsentApi = widget.androidSmsAutofillMethod ==
-        AndroidSmsAutofillMethod.smsUserConsentApi;
-
-    final res =
-    useUserConsentApi ? 
-     await _smartAuth!.getSmsWithUserConsentApi(
-      matcher: widget.smsCodeMatcher,
-      senderPhoneNumber: widget.senderPhoneNumber,
-    ): await _smartAuth!.getSmsWithRetrieverApi(
-      matcher: widget.smsCodeMatcher,);
-          if (res.hasData && res.requireData.code != null && res.requireData.code!.length == widget.length) {
-             _effectiveController.setText(res.requireData.code!);
-     res.requireData.code;
+    final res = await _smsRetriever!.getSmsCode();
+    if (res != null && res.length == widget.length) {
+      _effectiveController.setText(res);
     }
     
     // Listen for multiple sms codes
-    if (widget.listenForMultipleSmsOnAndroid) {
+    if (_smsRetriever!.listenForMultipleSms) {
       _listenForSmsCode();
     }
   }
@@ -217,7 +194,7 @@ class _PinputState extends State<Pinput>
     widget.controller?.removeListener(_handleTextEditingControllerChanges);
     _focusNode?.dispose();
     _controller?.dispose();
-    _smartAuth?.removeSmsRetrieverApiListener();
+    _smsRetriever?.dispose();
     // https://github.com/Tkko/Flutter_Pinput/issues/89
     _ambiguate(WidgetsBinding.instance)!.removeObserver(this);
     super.dispose();
@@ -368,6 +345,7 @@ class _PinputState extends State<Pinput>
                 builder: (_, Widget? child) => Semantics(
                   maxValueLength: widget.length,
                   currentValueLength: _currentLength,
+                  enabled: isEnabled,
                   onTap: widget.readOnly ? null : _semanticsOnTap,
                   onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
                   child: child,
@@ -480,12 +458,43 @@ class _PinputState extends State<Pinput>
     _requestKeyboard();
   }
 
+  PinItemStateType _getState(int index) {
+    if (!isEnabled) {
+      return PinItemStateType.disabled;
+    }
+
+    if (showErrorState) {
+      return PinItemStateType.error;
+    }
+
+    if (hasFocus && index == selectedIndex.clamp(0, widget.length - 1)) {
+      return PinItemStateType.focused;
+    }
+
+    if (index < selectedIndex) {
+      return PinItemStateType.submitted;
+    }
+
+    return PinItemStateType.following;
+  }
+
   Widget _buildFields() {
     Widget onlyFields() {
       return _SeparatedRaw(
         separatorBuilder: widget.separatorBuilder,
         mainAxisAlignment: widget.mainAxisAlignment,
         children: Iterable<int>.generate(widget.length).map<Widget>((index) {
+          if (widget._builder != null) {
+            return widget._builder!.itemBuilder.call(
+              context,
+              PinItemState(
+                value: pin.length > index ? pin[index] : '',
+                index: index,
+                type: _getState(index),
+              ),
+            );
+          }
+
           return _PinItem(state: this, index: index);
         }).toList(),
       );
@@ -565,7 +574,6 @@ class _PinputState extends State<Pinput>
             uniqueIdentifier: autofillId,
             autofillHints: autofillHints,
             currentEditingValue: _effectiveController.value,
-            hintText: 'One Time Code',
           )
         : AutofillConfiguration.disabled;
 
