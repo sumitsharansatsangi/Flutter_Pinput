@@ -32,10 +32,17 @@ class _PinputState extends State<Pinput>
   RestorableTextEditingController? _controller;
   FocusNode? _focusNode;
   bool _isHovering = false;
+  bool _isDisposed = false;
+  int _smsRetrieverGeneration = 0;
+  String? _lastValidatedPin;
   String? _validatorErrorText;
   SmsRetriever? _smsRetriever;
 
-  String? get _errorText => widget.errorText ?? _validatorErrorText;
+  String? get _errorText =>
+      widget.errorText ?? _validatorErrorTextForCurrentPin;
+
+  String? get _validatorErrorTextForCurrentPin =>
+      _lastValidatedPin == pin ? _validatorErrorText : null;
 
   bool get _canRequestFocus {
     final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ??
@@ -56,7 +63,7 @@ class _PinputState extends State<Pinput>
       widget.focusNode ?? (_focusNode ??= FocusNode());
 
   @protected
-  bool get hasError => widget.forceErrorState || _validatorErrorText != null;
+  bool get hasError => widget.forceErrorState || _errorText != null;
 
   @protected
   bool get isEnabled => widget.enabled;
@@ -92,22 +99,65 @@ class _PinputState extends State<Pinput>
   }
 
   /// Android Autofill
-  void _maybeInitSmartAuth() async {
-    if (_smsRetriever == null && widget.smsRetriever != null) {
-      _smsRetriever = widget.smsRetriever!;
-      _listenForSmsCode();
+  void _maybeInitSmartAuth() {
+    _syncSmsRetriever();
+  }
+
+  void _syncSmsRetriever() {
+    if (identical(_smsRetriever, widget.smsRetriever)) return;
+
+    _smsRetrieverGeneration += 1;
+    final previousRetriever = _smsRetriever;
+    _smsRetriever = widget.smsRetriever;
+
+    if (previousRetriever != null && !identical(previousRetriever, _smsRetriever)) {
+      unawaited(previousRetriever.dispose());
+    }
+
+    final nextRetriever = _smsRetriever;
+    if (nextRetriever != null) {
+      unawaited(
+        _listenForSmsCode(
+          retriever: nextRetriever,
+          generation: _smsRetrieverGeneration,
+        ),
+      );
     }
   }
 
-  void _listenForSmsCode() async {
-    final res = await _smsRetriever!.getSmsCode();
-    if (res != null && res.length == widget.length) {
-      _effectiveController.setText(res);
-    }
-    
-    // Listen for multiple sms codes
-    if (_smsRetriever!.listenForMultipleSms) {
-      _listenForSmsCode();
+  Future<void> _listenForSmsCode({
+    required SmsRetriever retriever,
+    required int generation,
+  }) async {
+    while (!_isDisposed &&
+        generation == _smsRetrieverGeneration &&
+        identical(_smsRetriever, retriever)) {
+      try {
+        final res = await retriever.getSmsCode();
+        if (_isDisposed ||
+            generation != _smsRetrieverGeneration ||
+            !identical(_smsRetriever, retriever)) {
+          return;
+        }
+
+        if (res != null && res.length == widget.length) {
+          _effectiveController.setText(res);
+        }
+
+        if (!retriever.listenForMultipleSms) {
+          return;
+        }
+      } catch (error, stackTrace) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: error,
+            stack: stackTrace,
+            library: 'pinput',
+            context: ErrorDescription('while retrieving an SMS code'),
+          ),
+        );
+        return;
+      }
     }
   }
 
@@ -164,6 +214,20 @@ class _PinputState extends State<Pinput>
       widget.controller?.addListener(_handleTextEditingControllerChanges);
     }
 
+    if (!identical(widget.smsRetriever, oldWidget.smsRetriever)) {
+      _syncSmsRetriever();
+    }
+
+    if (widget.validator == null && oldWidget.validator != null) {
+      _clearValidatorError();
+    } else if (widget.validator != oldWidget.validator) {
+      if (_completed) {
+        _validator();
+      } else {
+        _clearValidatorError();
+      }
+    }
+
     _effectiveFocusNode.canRequestFocus = _canRequestFocus;
   }
 
@@ -192,11 +256,17 @@ class _PinputState extends State<Pinput>
 
   @override
   void dispose() {
+    _isDisposed = true;
+    _smsRetrieverGeneration += 1;
     widget.controller?.removeListener(_handleTextEditingControllerChanges);
     _controller?.removeListener(_handleTextEditingControllerChanges);
     _controller?.dispose();
     _focusNode?.dispose();
-    _smsRetriever?.dispose();
+    final smsRetriever = _smsRetriever;
+    _smsRetriever = null;
+    if (smsRetriever != null) {
+      unawaited(smsRetriever.dispose());
+    }
     // https://github.com/Tkko/Flutter_Pinput/issues/89
     _ambiguate(WidgetsBinding.instance)!.removeObserver(this);
     super.dispose();
@@ -280,9 +350,22 @@ class _PinputState extends State<Pinput>
   }
 
   String? _validator([String? _]) {
-    final res = widget.validator?.call(pin);
-    setState(() => _validatorErrorText = res);
+    final currentPin = pin;
+    final res = widget.validator?.call(currentPin);
+    setState(() {
+      _lastValidatedPin = currentPin;
+      _validatorErrorText = res;
+    });
     return res;
+  }
+
+  void _clearValidatorError() {
+    if (_validatorErrorText == null && _lastValidatedPin == null) return;
+
+    setState(() {
+      _lastValidatedPin = null;
+      _validatorErrorText = null;
+    });
   }
 
   @override
@@ -487,6 +570,10 @@ class _PinputState extends State<Pinput>
 
     if (showErrorState) {
       return PinItemStateType.error;
+    }
+
+    if (!hasFocus && selectedIndex == 0) {
+      return PinItemStateType.initial;
     }
 
     if (hasFocus && index == selectedIndex.clamp(0, widget.length - 1)) {

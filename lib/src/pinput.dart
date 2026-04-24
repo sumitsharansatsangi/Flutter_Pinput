@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
@@ -164,7 +165,10 @@ class Pinput extends StatefulWidget {
     this.mouseCursor,
     this.forceErrorState = false,
     this.showErrorWhenFocused = false,
+    this.errorText,
     this.validator,
+    this.errorBuilder,
+    this.errorTextStyle,
     this.pinputAutovalidateMode = PinputAutovalidateMode.onSubmit,
     this.scrollPadding = const EdgeInsets.all(20),
     this.contextMenuBuilder = _defaultContextMenuBuilder,
@@ -194,10 +198,7 @@ class Pinput extends StatefulWidget {
         slideTransitionBeginOffset = null,
         cursor = null,
         obscuringCharacter = '•',
-        obscuringWidget = null,
-        errorText = null,
-        errorBuilder = null,
-        errorTextStyle = null;
+        obscuringWidget = null;
 
   /// Theme of the pin in default state
   final PinTheme? defaultPinTheme;

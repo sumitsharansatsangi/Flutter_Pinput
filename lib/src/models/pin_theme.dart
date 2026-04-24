@@ -2,6 +2,7 @@ part of '../pinput.dart';
 
 /// Theme of the individual pin items for following states:
 /// default, focused pin, submitted pin, following pin, disabled pin and error pin
+@immutable
 class PinTheme {
   /// width of each [Pinput] field
   final double? width;
@@ -58,7 +59,7 @@ class PinTheme {
     this.constraints,
   });
 
-  /// Merge two [PinTheme] into one
+  /// Merge two [PinTheme]s into one by using this theme's non-null values first.
   PinTheme apply({required PinTheme theme}) {
     return PinTheme(
       width: this.width ?? theme.width,
@@ -103,9 +104,15 @@ class PinTheme {
     BlendMode? backgroundBlendMode,
     BoxShape? shape,
   }) {
-    assert(decoration != null);
+    final currentDecoration = decoration;
+    if (currentDecoration == null) {
+      throw StateError(
+        'PinTheme.decoration must not be null to use copyDecorationWith.',
+      );
+    }
+
     return copyWith(
-      decoration: decoration?.copyWith(
+      decoration: currentDecoration.copyWith(
         color: color,
         image: image,
         border: border,
@@ -120,9 +127,39 @@ class PinTheme {
 
   /// Create a new [PinTheme] from the current instance with new border
   PinTheme copyBorderWith({required Border border}) {
-    assert(decoration != null);
+    final currentDecoration = decoration;
+    if (currentDecoration == null) {
+      throw StateError(
+        'PinTheme.decoration must not be null to use copyBorderWith.',
+      );
+    }
+
     return copyWith(
-      decoration: decoration?.copyWith(border: border),
+      decoration: currentDecoration.copyWith(border: border),
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is PinTheme &&
+        other.width == width &&
+        other.height == height &&
+        other.textStyle == textStyle &&
+        other.margin == margin &&
+        other.padding == padding &&
+        other.constraints == constraints &&
+        other.decoration == decoration;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        width,
+        height,
+        textStyle,
+        margin,
+        padding,
+        constraints,
+        decoration,
+      );
 }
