@@ -9,7 +9,14 @@ enum PinputAutovalidateMode {
   onSubmit,
 }
 
-/// The method that is used to get the sms code on Android
+/// Legacy Android SMS autofill mode configuration.
+///
+/// This enum is no longer used by [Pinput]. Configure Android SMS autofill by
+/// providing a custom [SmsRetriever] instead.
+@Deprecated(
+  'AndroidSmsAutofillMethod is no longer used by Pinput. '
+  'Provide a SmsRetriever instead.',
+)
 enum AndroidSmsAutofillMethod {
   /// Disabled SMS autofill on Android
   none,

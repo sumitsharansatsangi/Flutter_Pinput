@@ -13,7 +13,7 @@ abstract class SmsRetriever {
   Future<void> dispose();
 }
 
-/// SmartAuthExample:
+/// Example implementation using the `smart_auth` package:
 // class SmsRetrieverImpl implements SmsRetriever {
 //   const SmsRetrieverImpl(this.smartAuth);
 //

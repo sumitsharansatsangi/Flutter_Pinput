@@ -10,7 +10,7 @@ class PinTheme {
   /// height of each [Pinput] field
   final double? height;
 
-  /// The style to use for PinPut
+  /// The style to use for the [Pinput] text.
   /// If null, defaults to the `subhead` text style from the current [Theme].
   final TextStyle? textStyle;
 

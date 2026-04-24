@@ -30,7 +30,7 @@ part 'utils/pinput_utils_mixin.dart';
 
 part 'widgets/_pinput_selection_gesture_detector_builder.dart';
 
-/// Flutter package to create easily customizable Pin code input field, that your designers can't even draw in Figma 🤭
+/// Flutter package to create an easily customizable PIN code input field.
 ///
 /// ## Features:
 /// - Animated Decoration Switching
@@ -49,7 +49,7 @@ part 'widgets/_pinput_selection_gesture_detector_builder.dart';
 /// - Close Keyboard After Completion
 /// - Beautiful [Examples](https://github.com/Tkko/Flutter_PinPut/tree/master/example/lib/demo)
 class Pinput extends StatefulWidget {
-  /// Creates a PinPut widget
+  /// Creates a [Pinput] widget.
   const Pinput({
     this.length = PinputConstants._defaultLength,
     this.smsRetriever,
@@ -124,8 +124,8 @@ class Pinput extends StatefulWidget {
         ),
         _builder = null;
 
-  /// Creates a PinPut widget with custom pin item builder
-  /// This gives you full control over the pin item widget
+  /// Creates a [Pinput] widget with a custom pin item builder.
+  /// This gives you full control over each pin item widget.
   Pinput.builder({
     required PinItemWidgetBuilder builder,
     this.smsRetriever,
@@ -224,9 +224,10 @@ class Pinput extends StatefulWidget {
   /// Displayed fields count. PIN code length.
   final int length;
 
-  /// By default Android autofill is Disabled, you can enable it by passing [smsRetriever]
-  /// SmsRetriever exposes methods to listen for incoming SMS and extract code from it
-  /// Recommended package to get sms code on Android is smart_auth https://pub.dev/packages/smart_auth
+  /// Enables custom Android SMS autofill integration.
+  ///
+  /// Provide a [SmsRetriever] to listen for incoming SMS messages and extract
+  /// the one-time code. A common choice is the `smart_auth` package.
   final SmsRetriever? smsRetriever;
 
   /// Fires when user completes pin input
@@ -238,15 +239,15 @@ class Pinput extends StatefulWidget {
   /// See [EditableText.onSubmitted]
   final ValueChanged<String>? onSubmitted;
 
-  /// Called when user clicks on PinPut
+  /// Called when the user taps the [Pinput].
   final VoidCallback? onTap;
 
   /// Triggered when a pointer has remained in contact with the Pinput at the
   /// same location for a long period of time.
   final VoidCallback? onLongPress;
 
-  /// Used to get, modify PinPut value and more.
-  /// Don't forget to dispose controller
+  /// Used to read and modify the [Pinput] value.
+  /// Don't forget to dispose the controller.
   /// ``` dart
   ///   @override
   ///   void dispose() {
@@ -276,8 +277,8 @@ class Pinput extends StatefulWidget {
   /// If null SizedBox(width: 8) will be used
   final JustIndexedWidgetBuilder? separatorBuilder;
 
-  /// Builds a [Pinput] item
-  /// If null the default _PinItem will be used
+  /// Builds a [Pinput] item.
+  /// If null, the default `_PinItem` is used.
   final _PinItemBuilder? _builder;
 
   /// Defines how [Pinput] fields are being placed inside [Row]
@@ -289,10 +290,10 @@ class Pinput extends StatefulWidget {
   /// Defines how each [Pinput] field are being placed within the container
   final AlignmentGeometry pinContentAlignment;
 
-  /// curve of every [Pinput] Animation
+  /// Curve of every [Pinput] animation.
   final Curve animationCurve;
 
-  /// Duration of every [Pinput] Animation
+  /// Duration of every [Pinput] animation.
   final Duration animationDuration;
 
   /// Animation Type of each [Pinput] field
@@ -300,7 +301,7 @@ class Pinput extends StatefulWidget {
   /// none, scale, fade, slide, rotation
   final PinAnimationType pinAnimationType;
 
-  /// Begin Offset of ever [Pinput] field when [pinAnimationType] is slide
+  /// Begin offset of every [Pinput] field when [pinAnimationType] is slide.
   final Offset? slideTransitionBeginOffset;
 
   /// Defines [Pinput] state
@@ -313,8 +314,8 @@ class Pinput extends StatefulWidget {
   final bool autofocus;
 
   /// Whether to use Native keyboard or custom one
-  /// when flag is set to false [Pinput] wont be focusable anymore
-  /// so you should set value of [Pinput]'s [TextEditingController] programmatically
+  /// When false, [Pinput] is no longer focusable and its value should be
+  /// driven programmatically through the [TextEditingController].
   final bool useNativeKeyboard;
 
   /// If true, paste button will appear on longPress event

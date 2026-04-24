@@ -92,14 +92,14 @@ class _PinputState extends State<Pinput>
     }
 
     _effectiveFocusNode.canRequestFocus = isEnabled && widget.useNativeKeyboard;
-    _maybeInitSmartAuth();
+    _maybeInitSmsRetriever();
     _maybeCheckClipboard();
     // https://github.com/Tkko/Flutter_Pinput/issues/89
     _ambiguate(WidgetsBinding.instance)!.addObserver(this);
   }
 
-  /// Android Autofill
-  void _maybeInitSmartAuth() {
+  /// Android SMS autofill.
+  void _maybeInitSmsRetriever() {
     _syncSmsRetriever();
   }
 
@@ -373,9 +373,7 @@ class _PinputState extends State<Pinput>
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
-    final isDense = widget.mainAxisAlignment == MainAxisAlignment.center;
-
-    return isDense ? IntrinsicWidth(child: _buildPinput()) : _buildPinput();
+    return _buildPinput();
   }
 
   Widget _buildPinput() {
@@ -588,23 +586,30 @@ class _PinputState extends State<Pinput>
   }
 
   Widget _buildFields() {
+    final shouldFlexItems = widget.mainAxisAlignment != MainAxisAlignment.center;
+
+    Widget maybeWrapWithFlexible(Widget child) {
+      if (!shouldFlexItems) return child;
+      return Flexible(child: child);
+    }
+
     Widget onlyFields() {
       return _SeparatedRaw(
         separatorBuilder: widget.separatorBuilder,
         mainAxisAlignment: widget.mainAxisAlignment,
         children: Iterable<int>.generate(widget.length).map<Widget>((index) {
-          if (widget._builder != null) {
-            return widget._builder!.itemBuilder.call(
-              context,
-              PinItemState(
-                value: pin.length > index ? pin[index] : '',
-                index: index,
-                type: _getState(index),
-              ),
-            );
-          }
+          final field = widget._builder != null
+              ? widget._builder!.itemBuilder.call(
+                  context,
+                  PinItemState(
+                    value: pin.length > index ? pin[index] : '',
+                    index: index,
+                    type: _getState(index),
+                  ),
+                )
+              : _PinItem(state: this, index: index);
 
-          return _PinItem(state: this, index: index);
+          return maybeWrapWithFlexible(field);
         }).toList(),
       );
     }

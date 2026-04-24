@@ -1,6 +1,6 @@
 part of '../pinput.dart';
 
-/// Helper methods for Pinput to easily set, delete, append the value programmatically
+/// Helper methods to set, delete, and append the [Pinput] value programmatically.
 /// ``` dart
 /// final controller = TextEditingController();
 ///
@@ -12,16 +12,16 @@ part of '../pinput.dart';
 /// ```
 ///
 extension PinputControllerExt on TextEditingController {
-  /// The length of the Pinput value
+  /// The length of the [Pinput] value.
   int get length => this.text.length;
 
-  /// Sets Pinput value
+  /// Sets the [Pinput] value.
   void setText(String pin) {
     this.text = pin;
     this.moveCursorToEnd();
   }
 
-  /// Deletes the last character of Pinput value
+  /// Deletes the last character of the [Pinput] value.
   void delete() {
     if (text.isEmpty) return;
     final pin = this.text.substring(0, this.length - 1);
@@ -29,14 +29,14 @@ extension PinputControllerExt on TextEditingController {
     this.moveCursorToEnd();
   }
 
-  /// Appends character at the end of the Pinput
+  /// Appends a character to the end of the [Pinput] value.
   void append(String s, int maxLength) {
     if (this.length == maxLength) return;
     this.text = '${this.text}$s';
     this.moveCursorToEnd();
   }
 
-  /// Moves cursor at the end
+  /// Moves the cursor to the end.
   void moveCursorToEnd() {
     this.selection = TextSelection.collapsed(offset: this.length);
   }
