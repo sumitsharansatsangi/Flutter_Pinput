@@ -30,6 +30,9 @@ class SmsRetrieverApiExample extends StatefulWidget {
 
   @override
   State<SmsRetrieverApiExample> createState() => _SmsRetrieverApiExampleState();
+
+  @override
+  String toStringShort() => 'SMS Retriever';
 }
 
 class _SmsRetrieverApiExampleState extends State<SmsRetrieverApiExample> {
@@ -43,6 +46,21 @@ class _SmsRetrieverApiExampleState extends State<SmsRetrieverApiExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Pinput(smsRetriever: smsRetrieverImpl);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 16),
+          child: Text(
+            'Autofills from SMS Retriever API through a custom SmsRetriever.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Pinput(
+          smsRetriever: smsRetrieverImpl,
+          length: 6,
+        ),
+      ],
+    );
   }
 }

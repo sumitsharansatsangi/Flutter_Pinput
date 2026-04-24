@@ -1,3 +1,15 @@
+#### Unreleased
+
+- fix: make `SmsRetriever` lifecycle safer across widget updates and disposal
+- fix: clear validator-driven error state when the PIN value changes
+- fix: apply error styling correctly when `errorText` is supplied externally
+- feat: support `errorText`, `errorBuilder`, and `errorTextStyle` in `Pinput.builder`
+- feat: expose `PinItemStateType.initial` for untouched builder items
+- perf: remove `IntrinsicWidth` from the centered layout path
+- refactor: extract public models and utility types from `part` files into standalone libraries
+- docs: deprecate legacy `AndroidSmsAutofillMethod` in favor of `SmsRetriever`
+- test: add regression coverage for builder errors, initial state, validation clearing, and layout behavior
+
 #### 6.0.2 · 4/01/2026
 
 - Added Prelude.so sponsorship badge

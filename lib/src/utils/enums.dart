@@ -1,4 +1,6 @@
-part of '../pinput.dart';
+import 'package:flutter/widgets.dart';
+
+import '../models/sms_retriever.dart';
 
 /// The mode which determines the Pinput validation method
 enum PinputAutovalidateMode {

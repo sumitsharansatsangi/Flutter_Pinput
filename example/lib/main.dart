@@ -57,7 +57,7 @@ class _PinputExampleState extends State<PinputExample> {
     pinController = TextEditingController();
     focusNode = FocusNode();
 
-    /// In case you need an SMS autofill feature
+    /// In case you need SMS autofill, provide your own SmsRetriever
     smsRetriever = SmsRetrieverImpl(SmartAuth.instance);
   }
 
@@ -100,8 +100,8 @@ class _PinputExampleState extends State<PinputExample> {
             // Specify direction if desired
             textDirection: TextDirection.ltr,
             child: Pinput(
-              // You can pass your own SmsRetriever implementation based on any package
-              // in this example we are using the SmartAuth
+              // You can pass your own SmsRetriever implementation based on any package.
+              // This example uses smart_auth.
               smsRetriever: smsRetriever,
               controller: pinController,
               focusNode: focusNode,
@@ -159,8 +159,7 @@ class _PinputExampleState extends State<PinputExample> {
   }
 }
 
-/// You, as a developer should implement this interface.
-/// You can use any package to retrieve the SMS code. in this example we are using SmartAuth
+/// Example SmsRetriever implementation using smart_auth.
 class SmsRetrieverImpl implements SmsRetriever {
   const SmsRetrieverImpl(this.smartAuth);
 

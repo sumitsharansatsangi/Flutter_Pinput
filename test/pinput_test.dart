@@ -9,9 +9,22 @@ void main() {
     const length = 4;
     await tester.pumpApp(const Pinput(length: length));
 
-    expect(find.byType(Flexible), findsNWidgets(length));
+    expect(find.byType(Flexible), findsNothing);
     expect(find.byType(AnimatedContainer), findsNWidgets(length));
     expect(find.byType(Text), findsNWidgets(length));
+  });
+
+  testWidgets('Non-centered layouts still use flexible pin items',
+      (WidgetTester tester) async {
+    const length = 4;
+    await tester.pumpApp(
+      const Pinput(
+        length: length,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      ),
+    );
+
+    expect(find.byType(Flexible), findsNWidgets(length));
   });
 
   testWidgets('Should properly handle states', (WidgetTester tester) async {
@@ -57,7 +70,7 @@ void main() {
     }
 
     // Unfocused
-    testState(length, followingTheme);
+    testState(length, defaultTheme);
     testState(0, focusedTheme);
     testState(0, submittedTheme);
     testState(0, errorTheme);
@@ -133,6 +146,35 @@ void main() {
 
     await tester.pump();
     expect(find.byType(FlutterLogo), findsOneWidget);
+  });
+
+  testWidgets('Builder constructor renders error content',
+      (WidgetTester tester) async {
+    await tester.pumpApp(
+      Pinput.builder(
+        length: 4,
+        errorText: 'Invalid PIN',
+        forceErrorState: true,
+        builder: (_, state) => Text('${state.index}:${state.type.name}'),
+      ),
+    );
+
+    expect(find.text('Invalid PIN'), findsOneWidget);
+  });
+
+  testWidgets('Builder constructor exposes initial pin item state',
+      (WidgetTester tester) async {
+    await tester.pumpApp(
+      Pinput.builder(
+        length: 4,
+        builder: (_, state) => Text('${state.index}:${state.type.name}'),
+      ),
+    );
+
+    expect(find.text('0:initial'), findsOneWidget);
+    expect(find.text('1:initial'), findsOneWidget);
+    expect(find.text('2:initial'), findsOneWidget);
+    expect(find.text('3:initial'), findsOneWidget);
   });
 
   group('onChanged should work properly', () {
@@ -342,5 +384,49 @@ void main() {
     await tester.enterText(find.byType(EditableText), '123');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     expect(fieldValue, equals('123'));
+  });
+
+  testWidgets('Validator error is cleared when pin changes after validation',
+      (WidgetTester tester) async {
+    final controller = TextEditingController();
+
+    await tester.pumpApp(
+      Pinput(
+        controller: controller,
+        validator: (value) => value == '1234' ? 'Invalid PIN' : null,
+      ),
+    );
+
+    controller.setText('1234');
+    await tester.pump();
+    expect(find.text('Invalid PIN'), findsOneWidget);
+
+    controller.setText('12');
+    await tester.pump();
+    expect(find.text('Invalid PIN'), findsNothing);
+  });
+
+  testWidgets('External errorText applies error theme',
+      (WidgetTester tester) async {
+    const errorTheme = PinTheme(
+      decoration: BoxDecoration(color: Colors.red),
+    );
+
+    await tester.pumpApp(
+      const Pinput(
+        errorText: 'Server error',
+        errorPinTheme: errorTheme,
+      ),
+    );
+
+    expect(find.text('Server error'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is AnimatedContainer &&
+            widget.decoration == errorTheme.decoration,
+      ),
+      findsNWidgets(4),
+    );
   });
 }

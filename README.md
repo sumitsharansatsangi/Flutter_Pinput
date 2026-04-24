@@ -74,7 +74,7 @@ Don't forget to give it a star ⭐
 
 ## Getting Started
 
-The pin has 6 states `default` `focused`, `submitted`, `following`, `disabled`, `error`, you can customize each state by specifying theme parameter.
+The built-in pin UI has 6 visual states: `default`, `focused`, `submitted`, `following`, `disabled`, `error`.
 Pin smoothly animates from one state to another automatically.
 `PinTheme Class`
 
@@ -165,6 +165,43 @@ onCompleted: (pin) => print(pin),
 );
 ```
 
+## Custom Item Builder
+
+Use `Pinput.builder` when you want full control over each pin item widget.
+
+```dart
+Pinput.builder(
+  length: 4,
+  forceErrorState: true,
+  errorText: 'Code is invalid',
+  builder: (context, item) {
+    return Container(
+      width: 56,
+      height: 56,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: switch (item.type) {
+            PinItemStateType.initial => Colors.grey,
+            PinItemStateType.focused => Colors.blue,
+            PinItemStateType.submitted => Colors.green,
+            PinItemStateType.following => Colors.grey.shade400,
+            PinItemStateType.disabled => Colors.grey.shade300,
+            PinItemStateType.error => Colors.red,
+          },
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(item.value),
+    );
+  },
+);
+```
+
+`PinItemStateType.initial` is emitted for untouched empty fields before focus is gained.
+`Pinput.builder` also supports the same error presentation parameters as the default constructor,
+including `errorText`, `errorBuilder`, and `errorTextStyle`.
+
 ## SMS Autofill
 
 ### iOS
@@ -173,7 +210,7 @@ Works out of the box, by tapping the code on top of the keyboard
 
 ### Android
 
-If you are using [firebase_auth](https://firebase.flutter.dev/docs/auth/phone#verificationcompleted) you have to set `controller'`s value in `verificationCompleted` callback, here is an example code:
+If you are using [firebase_auth](https://firebase.flutter.dev/docs/auth/phone#verificationcompleted) you have to set the controller value in `verificationCompleted`, for example:
 ``` dart
     Pinput(
       controller: pinController,
@@ -191,9 +228,41 @@ And set pinController's value in `verificationCompleted` callback:
     );
 ```
 ---
-If you aren't using firebase_auth, you have two options, [SMS Retriever API](https://developers.google.com/identity/sms-retriever/overview?hl=en) and [SMS User Consent API](https://developers.google.com/identity/sms-retriever/user-consent/overview),
+If you aren't using `firebase_auth`, provide a custom `SmsRetriever`.
+Pinput no longer uses `AndroidSmsAutofillMethod`; that enum is deprecated and kept only for backward compatibility.
+
+You can implement either [SMS Retriever API](https://developers.google.com/identity/sms-retriever/overview?hl=en) or [SMS User Consent API](https://developers.google.com/identity/sms-retriever/user-consent/overview),
 
 [SmartAuth](https://pub.dev/packages/smart_auth) is a wrapper package for Flutter for these APIs, so go ahead and add it as a dependency.
+
+```dart
+class SmsRetrieverImpl implements SmsRetriever {
+  SmsRetrieverImpl(this.smartAuth);
+
+  final SmartAuth smartAuth;
+
+  @override
+  bool get listenForMultipleSms => false;
+
+  @override
+  Future<String?> getSmsCode() async {
+    final res = await smartAuth.getSmsCode();
+    if (res.succeed && res.codeFound) {
+      return res.code;
+    }
+    return null;
+  }
+
+  @override
+  Future<void> dispose() {
+    return smartAuth.removeSmsListener();
+  }
+}
+
+Pinput(
+  smsRetriever: SmsRetrieverImpl(SmartAuth()),
+);
+```
 
 ###### SMS Retriever API
 
@@ -297,6 +366,8 @@ return Form(
   ),
 );
 ```
+
+You can also use the same error APIs with `Pinput.builder`.
 
 ## FAQ
 

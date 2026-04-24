@@ -7,22 +7,23 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'models/models.dart';
+import 'models/pin_theme.dart';
+import 'models/sms_retriever.dart';
+import 'utils/enums.dart';
+import 'utils/extensions.dart';
+
+export 'models/models.dart';
+export 'models/pin_theme.dart';
+export 'models/sms_retriever.dart';
+export 'utils/enums.dart';
+export 'utils/extensions.dart';
 
 part 'pinput_state.dart';
-
-part 'utils/enums.dart';
 
 part 'utils/pinput_constants.dart';
 
 part 'widgets/widgets.dart';
-
-part 'models/pin_theme.dart';
-
-part 'models/models.dart';
-
-part 'models/sms_retriever.dart';
-
-part 'utils/extensions.dart';
 
 part 'widgets/_pin_item.dart';
 
@@ -48,6 +49,15 @@ part 'widgets/_pinput_selection_gesture_detector_builder.dart';
 /// - Haptic Feedback
 /// - Close Keyboard After Completion
 /// - Beautiful [Examples](https://github.com/Tkko/Flutter_PinPut/tree/master/example/lib/demo)
+class _PinItemBuilder {
+  const _PinItemBuilder({
+    required this.itemBuilder,
+  });
+
+  final PinItemWidgetBuilder itemBuilder;
+}
+
+/// A customizable PIN code input widget built on top of [EditableText].
 class Pinput extends StatefulWidget {
   /// Creates a [Pinput] widget.
   const Pinput({

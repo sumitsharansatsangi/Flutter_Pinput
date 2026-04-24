@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pinput_example/demo/builder_example.dart';
 import 'package:pinput_example/demo/demo.dart';
 import 'package:pinput_example/demo/pages/all_pinputs_page.dart';
 import 'package:pinput_example/demo/pages/otp_page.dart';
@@ -7,6 +8,8 @@ import 'package:pinput_example/demo/pinput_templates/filled_rounded.dart';
 import 'package:pinput_example/demo/pinput_templates/only_bottom_cursor.dart';
 import 'package:pinput_example/demo/pinput_templates/rounded_with_cursor.dart';
 import 'package:pinput_example/demo/pinput_templates/rounded_with_shadow.dart';
+import 'package:pinput_example/demo/sms_retriever_api_example.dart';
+import 'package:pinput_example/demo/user_consent_api_example.dart';
 
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});
@@ -44,6 +47,18 @@ class GalleryPageState extends State<GalleryPage>
       const Color.fromRGBO(228, 217, 236, 1),
       const Color.fromRGBO(255, 255, 255, 1),
     ],
+    [
+      const Color.fromRGBO(239, 247, 255, 1),
+      const Color.fromRGBO(255, 255, 255, 1),
+    ],
+    [
+      const Color.fromRGBO(245, 250, 235, 1),
+      const Color.fromRGBO(255, 255, 255, 1),
+    ],
+    [
+      const Color.fromRGBO(255, 246, 233, 1),
+      const Color.fromRGBO(255, 255, 255, 1),
+    ],
   ];
 
   final List<Widget> pinPuts = [];
@@ -57,6 +72,9 @@ class GalleryPageState extends State<GalleryPage>
       OtpPage(OnlyBottomCursor()),
       OtpPage(FilledRoundedPinPut()),
       OtpPage(Filled()),
+      OtpPage(PinputBuilderExample()),
+      OtpPage(SmsRetrieverApiExample()),
+      OtpPage(UserConsentApiExample()),
     ];
     pinPuts.addAll([
       AllPinputs(otpPages.map((e) => e.pinPut).toList(), backgroundColors),

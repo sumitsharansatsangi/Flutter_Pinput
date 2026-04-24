@@ -1,4 +1,4 @@
-part of '../pinput.dart';
+import 'package:flutter/widgets.dart';
 
 /// Helper methods to set, delete, and append the [Pinput] value programmatically.
 /// ``` dart

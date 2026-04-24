@@ -1,4 +1,4 @@
-part of '../pinput.dart';
+import 'package:flutter/widgets.dart';
 
 /// A widget builder that represents a single pin field.
 typedef PinItemWidgetBuilder = Widget Function(
@@ -44,12 +44,4 @@ class PinItemState {
 
   /// The state of the individual pin item.
   final PinItemStateType type;
-}
-
-class _PinItemBuilder {
-  const _PinItemBuilder({
-    required this.itemBuilder,
-  });
-
-  final PinItemWidgetBuilder itemBuilder;
 }

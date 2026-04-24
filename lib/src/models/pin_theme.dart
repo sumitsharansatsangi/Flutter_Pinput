@@ -1,4 +1,4 @@
-part of '../pinput.dart';
+import 'package:flutter/material.dart';
 
 /// Theme of the individual pin items for following states:
 /// default, focused pin, submitted pin, following pin, disabled pin and error pin

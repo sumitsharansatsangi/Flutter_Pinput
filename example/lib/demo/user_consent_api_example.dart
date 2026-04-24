@@ -14,11 +14,10 @@ class SmsRetrieverImpl implements SmsRetriever {
 
   @override
   Future<String?> getSmsCode() async {
-    final res = await smartAuth.getSmsWithUserConsentApi(
-    );
-  if(res.hasData) {
-    return res.data!.code;
-  }
+    final res = await smartAuth.getSmsWithUserConsentApi();
+    if (res.hasData) {
+      return res.data!.code;
+    }
     return null;
   }
 
@@ -31,6 +30,9 @@ class UserConsentApiExample extends StatefulWidget {
 
   @override
   State<UserConsentApiExample> createState() => _UserConsentApiExampleState();
+
+  @override
+  String toStringShort() => 'User Consent';
 }
 
 class _UserConsentApiExampleState extends State<UserConsentApiExample> {
@@ -44,6 +46,21 @@ class _UserConsentApiExampleState extends State<UserConsentApiExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Pinput(smsRetriever: smsRetrieverImpl);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 16),
+          child: Text(
+            'Prompts the user through SMS User Consent API via a custom SmsRetriever.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Pinput(
+          smsRetriever: smsRetrieverImpl,
+          length: 6,
+        ),
+      ],
+    );
   }
 }
