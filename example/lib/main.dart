@@ -58,9 +58,7 @@ class _PinputExampleState extends State<PinputExample> {
     focusNode = FocusNode();
 
     /// In case you need an SMS autofill feature
-    smsRetriever = SmsRetrieverImpl(
-      SmartAuth.instance,
-    );
+    smsRetriever = SmsRetrieverImpl(SmartAuth.instance);
   }
 
   @override

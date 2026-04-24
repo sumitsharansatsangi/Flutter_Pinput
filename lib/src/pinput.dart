@@ -64,6 +64,7 @@ class Pinput extends StatefulWidget {
     this.onTap,
     this.onLongPress,
     this.onTapOutside,
+    this.onTapUpOutside,
     this.controller,
     this.focusNode,
     this.preFilledWidget,
@@ -83,6 +84,7 @@ class Pinput extends StatefulWidget {
     this.showCursor = true,
     this.isCursorAnimationEnabled = true,
     this.enableIMEPersonalizedLearning = false,
+    this.enableInteractiveSelection,
     this.enableSuggestions = true,
     this.hapticFeedbackType = HapticFeedbackType.disabled,
     this.closeKeyboardWhenCompleted = true,
@@ -104,6 +106,7 @@ class Pinput extends StatefulWidget {
     this.onAppPrivateCommand,
     this.mouseCursor,
     this.forceErrorState = false,
+    this.showErrorWhenFocused = false,
     this.errorText,
     this.validator,
     this.errorBuilder,
@@ -132,6 +135,7 @@ class Pinput extends StatefulWidget {
     this.onTap,
     this.onLongPress,
     this.onTapOutside,
+    this.onTapUpOutside,
     this.controller,
     this.focusNode,
     this.separatorBuilder,
@@ -143,6 +147,7 @@ class Pinput extends StatefulWidget {
     this.toolbarEnabled = true,
     this.autofocus = false,
     this.enableIMEPersonalizedLearning = false,
+    this.enableInteractiveSelection = false,
     this.enableSuggestions = true,
     this.hapticFeedbackType = HapticFeedbackType.disabled,
     this.closeKeyboardWhenCompleted = true,
@@ -158,6 +163,7 @@ class Pinput extends StatefulWidget {
     this.onAppPrivateCommand,
     this.mouseCursor,
     this.forceErrorState = false,
+    this.showErrorWhenFocused = false,
     this.validator,
     this.pinputAutovalidateMode = PinputAutovalidateMode.onSubmit,
     this.scrollPadding = const EdgeInsets.all(20),
@@ -327,6 +333,15 @@ class Pinput extends StatefulWidget {
   // Defaults to false. Cannot be null.
   final bool enableIMEPersonalizedLearning;
 
+  /// Whether to enable text selection and interactive features like copy/paste.
+  /// When enabled, users can select text, use Ctrl+V to paste, and access context menus.
+  ///
+  /// This is useful for desktop applications where copy/paste is expected behavior.
+  /// On mobile, consider using SMS auto-fill or [onClipboardFound] callback instead.
+  ///
+  /// Defaults to false for security and UX reasons.
+  final bool? enableInteractiveSelection;
+
   /// If [showCursor] true the focused field will show passed Widget
   final Widget? cursor;
 
@@ -388,6 +403,9 @@ class Pinput extends StatefulWidget {
   /// If true [errorPinTheme] will be applied and [errorText] will be displayed under the Pinput
   final bool forceErrorState;
 
+  /// If true, the error will also be displayed in the focused state. Otherwise the error is not displayed in the focused state.
+  final bool showErrorWhenFocused;
+
   /// Text displayed under the Pinput if Pinput is invalid
   final String? errorText;
 
@@ -426,6 +444,22 @@ class Pinput extends StatefulWidget {
   /// This is useful if you want to un-focus the [Pinput] when user taps outside of it
   final TapRegionCallback? onTapOutside;
 
+  /// Called for each tap up that occurs outside of the [TextFieldTapRegion]
+  /// group when the text field is focused.
+  ///
+  /// This is useful if you want to un-focus the [Pinput] when user taps outside of it,
+  /// but not when user scrolls outside of it :
+  /// ```dart
+  /// onTapOutside: (event) => tapPosition = event.position,
+  /// onTapUpOutside: (event) {
+  ///   if (event.position == tapPosition) _focusNode.unfocus();
+  ///   tapPosition = null;
+  /// },
+  /// ```
+  ///
+  /// See also: [EditableText.onTapUpOutside].
+  final TapRegionUpCallback? onTapUpOutside;
+
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
     EditableTextState editableTextState,
@@ -452,6 +486,13 @@ class Pinput extends StatefulWidget {
       DiagnosticsProperty<PinTheme>(
         'focusedPinTheme',
         focusedPinTheme,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'enableInteractiveSelection',
+        enableInteractiveSelection,
         defaultValue: null,
       ),
     );

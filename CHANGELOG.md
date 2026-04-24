@@ -1,4 +1,29 @@
-#### 5.0.1 ·15/01/2025
+#### 6.0.2 · 4/01/2026
+
+- Added Prelude.so sponsorship badge
+
+#### 6.0.1 · 25/11/2025
+
+- fix: removed hintLocales [PR](https://github.com/Tkko/Flutter_Pinput/pull/224)
+
+#### 6.0.0 · 18/11/2025
+
+- feat: add hintLocales
+- feat: add showErrorWhenFocused [PR](https://github.com/Tkko/Flutter_Pinput/pull/202)
+  by [stefanschaller](https://github.com/stefanschaller)
+- feat: add onTapUpOutside [PR](https://github.com/Tkko/Flutter_Pinput/pull/222)
+  by [ChreSyr](https://github.com/ChreSyr)
+- feat: add onFocus to Semantics widget [PR](https://github.com/Tkko/Flutter_Pinput/pull/214)
+  by [SebastianWaloszek](https://github.com/SebastianWaloszek)
+- fixed ios deletion [issue](https://github.com/Tkko/Flutter_Pinput/issues/218)
+
+#### 5.0.2 · 01/09/2025
+
+- feat: add enableInteractiveSelection parameter
+  flag - [PR](https://github.com/Tkko/Flutter_Pinput/pull/216)
+  by [bybabek](https://github.com/bybabek)
+
+#### 5.0.1 · 15/01/2025
 
 - fix: makes Semantics responsive to `enabled`
   flag - [PR](https://github.com/Tkko/Flutter_Pinput/pull/201)
@@ -27,7 +52,7 @@
 - Replaced `separator` and `separatorPositions` with `separatorBuilder`
 
   | Property | Meaning/Default |
-        |--------------------------|:---------------:|
+          |--------------------------|:---------------:|
   | separatorBuilder | (_) => const SizedBox(width: 8)|
 
 #### 2.3.0 · 24/07/2023

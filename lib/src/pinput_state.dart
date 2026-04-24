@@ -52,7 +52,7 @@ class _PinputState extends State<Pinput>
       widget.controller ?? _controller!.value;
 
   @protected
-  FocusNode get effectiveFocusNode =>
+  FocusNode get _effectiveFocusNode =>
       widget.focusNode ?? (_focusNode ??= FocusNode());
 
   @protected
@@ -65,25 +65,26 @@ class _PinputState extends State<Pinput>
 
   EditableTextState? get _editableText => editableTextKey.currentState;
 
-  int get selectedIndex => pin.length;
+  int get selectedIndex => _currentLength;
 
   String get pin => _effectiveController.text;
 
-  bool get _completed => pin.length == widget.length;
+  bool get _completed => _currentLength == widget.length;
 
   @override
   void initState() {
     super.initState();
     _gestureDetectorBuilder =
         _PinputSelectionGestureDetectorBuilder(state: this);
-    if (widget.controller == null) {
+    if (widget.controller != null) {
+      _recentControllerValue = widget.controller!.value;
+      widget.controller!.addListener(_handleTextEditingControllerChanges);
+    } else {
       _createLocalController();
       _recentControllerValue = TextEditingValue.empty;
-    } else {
-      _recentControllerValue = _effectiveController.value;
-      widget.controller!.addListener(_handleTextEditingControllerChanges);
     }
-    effectiveFocusNode.canRequestFocus = isEnabled && widget.useNativeKeyboard;
+
+    _effectiveFocusNode.canRequestFocus = isEnabled && widget.useNativeKeyboard;
     _maybeInitSmartAuth();
     _maybeCheckClipboard();
     // https://github.com/Tkko/Flutter_Pinput/issues/89
@@ -136,14 +137,14 @@ class _PinputState extends State<Pinput>
 
   void _maybeCloseKeyboard() {
     if (widget.closeKeyboardWhenCompleted) {
-      effectiveFocusNode.unfocus();
+      _effectiveFocusNode.unfocus();
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    effectiveFocusNode.canRequestFocus = _canRequestFocus;
+    _effectiveFocusNode.canRequestFocus = _canRequestFocus;
   }
 
   @override
@@ -163,7 +164,7 @@ class _PinputState extends State<Pinput>
       widget.controller?.addListener(_handleTextEditingControllerChanges);
     }
 
-    effectiveFocusNode.canRequestFocus = _canRequestFocus;
+    _effectiveFocusNode.canRequestFocus = _canRequestFocus;
   }
 
   @override
@@ -192,8 +193,9 @@ class _PinputState extends State<Pinput>
   @override
   void dispose() {
     widget.controller?.removeListener(_handleTextEditingControllerChanges);
-    _focusNode?.dispose();
+    _controller?.removeListener(_handleTextEditingControllerChanges);
     _controller?.dispose();
+    _focusNode?.dispose();
     _smsRetriever?.dispose();
     // https://github.com/Tkko/Flutter_Pinput/issues/89
     _ambiguate(WidgetsBinding.instance)!.removeObserver(this);
@@ -201,7 +203,7 @@ class _PinputState extends State<Pinput>
   }
 
   void _requestKeyboard() {
-    if (effectiveFocusNode.canRequestFocus) {
+    if (_effectiveFocusNode.canRequestFocus) {
       _editableText?.requestKeyboard();
     }
   }
@@ -210,8 +212,14 @@ class _PinputState extends State<Pinput>
     TextSelection selection,
     SelectionChangedCause? cause,
   ) {
-    _effectiveController.selection =
-        TextSelection.collapsed(offset: pin.length);
+    // Selecting part of the text is not allowed.
+    final allSelected = selection.start == 0 && selection.end == _currentLength;
+    final lastCharSelected = selection.start == _currentLength - 1 &&
+        selection.end == _currentLength;
+    if (!allSelected && !lastCharSelected) {
+      _effectiveController.selection =
+          TextSelection.collapsed(offset: _currentLength);
+    }
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
@@ -301,9 +309,9 @@ class _PinputState extends State<Pinput>
         forcePressEnabled = false;
         textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
         handleDidGainAccessibilityFocus = () {
-          if (!effectiveFocusNode.hasFocus &&
-              effectiveFocusNode.canRequestFocus) {
-            effectiveFocusNode.requestFocus();
+          if (!_effectiveFocusNode.hasFocus &&
+              _effectiveFocusNode.canRequestFocus) {
+            _effectiveFocusNode.requestFocus();
           }
         };
         break;
@@ -320,9 +328,9 @@ class _PinputState extends State<Pinput>
         forcePressEnabled = false;
         textSelectionControls ??= desktopTextSelectionHandleControls;
         handleDidGainAccessibilityFocus = () {
-          if (!effectiveFocusNode.hasFocus &&
-              effectiveFocusNode.canRequestFocus) {
-            effectiveFocusNode.requestFocus();
+          if (!_effectiveFocusNode.hasFocus &&
+              _effectiveFocusNode.canRequestFocus) {
+            _effectiveFocusNode.requestFocus();
           }
         };
         break;
@@ -332,7 +340,7 @@ class _PinputState extends State<Pinput>
       enabled: isEnabled,
       validator: _validator,
       initialValue: _effectiveController.text,
-      builder: (FormFieldState<String> field) {
+      builder: (field) {
         return MouseRegion(
           cursor: _effectiveMouseCursor,
           onEnter: (PointerEnterEvent event) => _handleHover(true),
@@ -348,6 +356,16 @@ class _PinputState extends State<Pinput>
                   enabled: isEnabled,
                   onTap: widget.readOnly ? null : _semanticsOnTap,
                   onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+                  onFocus: isEnabled
+                      ? () {
+                          if (_effectiveFocusNode.canRequestFocus &&
+                              !_effectiveFocusNode.hasFocus) {
+                            _effectiveFocusNode.requestFocus();
+                          } else if (!widget.readOnly) {
+                            _requestKeyboard();
+                          }
+                        }
+                      : null,
                   child: child,
                 ),
                 child: _gestureDetectorBuilder.buildGestureDetector(
@@ -355,7 +373,10 @@ class _PinputState extends State<Pinput>
                   child: Stack(
                     alignment: Alignment.topCenter,
                     children: [
-                      _buildEditable(textSelectionControls, field),
+                      // the editable need to be the full size, otherwise the focus is not correct when getting the render box from the focus
+                      Positioned.fill(
+                        child: _buildEditable(textSelectionControls, field),
+                      ),
                       _buildFields(),
                     ],
                   ),
@@ -397,7 +418,7 @@ class _PinputState extends State<Pinput>
           autofillClient: this,
           showSelectionHandles: false,
           rendererIgnoresPointer: true,
-          enableInteractiveSelection: false,
+          enableInteractiveSelection: widget.enableInteractiveSelection,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
           textInputAction: widget.textInputAction,
           textCapitalization: widget.textCapitalization,
@@ -409,8 +430,9 @@ class _PinputState extends State<Pinput>
             _maybeValidateForm();
           },
           onTapOutside: widget.onTapOutside,
+          onTapUpOutside: widget.onTapUpOutside,
           mouseCursor: MouseCursor.defer,
-          focusNode: effectiveFocusNode,
+          focusNode: _effectiveFocusNode,
           textAlign: TextAlign.center,
           autofocus: widget.autofocus,
           inputFormatters: formatters,
@@ -445,7 +467,7 @@ class _PinputState extends State<Pinput>
         <WidgetState>{
           if (!isEnabled) WidgetState.disabled,
           if (_isHovering) WidgetState.hovered,
-          if (effectiveFocusNode.hasFocus) WidgetState.focused,
+          if (_effectiveFocusNode.hasFocus) WidgetState.focused,
           if (hasError) WidgetState.error,
         },
       );
@@ -503,7 +525,7 @@ class _PinputState extends State<Pinput>
     return Center(
       child: AnimatedBuilder(
         animation: Listenable.merge(
-          <Listenable>[effectiveFocusNode, _effectiveController],
+          <Listenable>[_effectiveFocusNode, _effectiveController],
         ),
         builder: (BuildContext context, Widget? child) {
           final shouldHideErrorContent =
@@ -530,12 +552,15 @@ class _PinputState extends State<Pinput>
   @protected
   bool get hasFocus {
     final isLastPin = selectedIndex == widget.length;
-    return effectiveFocusNode.hasFocus ||
+    return _effectiveFocusNode.hasFocus ||
         (!widget.useNativeKeyboard && !isLastPin);
   }
 
   @protected
-  bool get showErrorState => hasError && (!hasFocus || widget.forceErrorState);
+  bool get showErrorState {
+    return hasError &&
+        (!hasFocus || widget.showErrorWhenFocused || widget.forceErrorState);
+  }
 
   Widget _buildError() {
     if (showErrorState) {
