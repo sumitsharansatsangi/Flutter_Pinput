@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../pinput.dart';
@@ -8,7 +9,6 @@ abstract class PlatformPinputBase extends Pinput {
   const PlatformPinputBase({
     super.key,
     super.length,
-    super.smsRetriever,
     super.defaultPinTheme,
     super.focusedPinTheme,
     super.submittedPinTheme,
@@ -110,7 +110,7 @@ class MaterialPinput extends PlatformPinputBase {
   const MaterialPinput({
     super.key,
     super.length,
-    super.smsRetriever,
+    this.smsRetriever,
     super.defaultPinTheme,
     super.focusedPinTheme,
     super.submittedPinTheme,
@@ -126,11 +126,20 @@ class MaterialPinput extends PlatformPinputBase {
     super.mainAxisAlignment,
     super.enabled,
     super.autofocus,
+    super.hapticFeedbackType,
+    super.cursor,
     super.onClipboardFound,
     super.forceErrorState,
     super.errorText,
     super.validator,
   });
+
+  /// Android SMS Retriever integration, typically backed by `smart_auth`.
+  final SmsRetriever? smsRetriever;
+
+  @override
+  SmsRetriever? get androidSmsRetriever =>
+      defaultTargetPlatform == TargetPlatform.android ? smsRetriever : null;
 
   @override
   Color get accentColor => const Color(0xFF6750A4);

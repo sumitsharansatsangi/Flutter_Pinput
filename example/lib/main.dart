@@ -99,7 +99,7 @@ class _PinputExampleState extends State<PinputExample> {
           Directionality(
             // Specify direction if desired
             textDirection: TextDirection.ltr,
-            child: Pinput(
+            child: MaterialPinput(
               // You can pass your own SmsRetriever implementation based on any package.
               // This example uses smart_auth.
               smsRetriever: smsRetriever,

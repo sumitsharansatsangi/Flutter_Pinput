@@ -53,7 +53,7 @@ abstract class SmsRetriever {
 //
 //   @override
 //   Widget build(BuildContext context) {
-//     return Pinput(
+//     return MaterialPinput(
 //       smsRetriever: smsRetrieverImpl,
 //     );
 //   }

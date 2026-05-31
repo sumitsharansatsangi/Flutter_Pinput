@@ -56,10 +56,7 @@ class _UserConsentApiExampleState extends State<UserConsentApiExample> {
             textAlign: TextAlign.center,
           ),
         ),
-        Pinput(
-          smsRetriever: smsRetrieverImpl,
-          length: 6,
-        ),
+        MaterialPinput(smsRetriever: smsRetrieverImpl, length: 6),
       ],
     );
   }

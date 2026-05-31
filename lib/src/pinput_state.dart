@@ -106,11 +106,11 @@ class _PinputState extends State<Pinput>
   }
 
   void _syncSmsRetriever() {
-    if (identical(_smsRetriever, widget.smsRetriever)) return;
+    if (identical(_smsRetriever, widget.androidSmsRetriever)) return;
 
     _smsRetrieverGeneration += 1;
     final previousRetriever = _smsRetriever;
-    _smsRetriever = widget.smsRetriever;
+    _smsRetriever = widget.androidSmsRetriever;
 
     if (previousRetriever != null &&
         !identical(previousRetriever, _smsRetriever)) {
@@ -217,7 +217,7 @@ class _PinputState extends State<Pinput>
       widget.controller?.addListener(_handleTextEditingControllerChanges);
     }
 
-    if (!identical(widget.smsRetriever, oldWidget.smsRetriever)) {
+    if (!identical(widget.androidSmsRetriever, oldWidget.androidSmsRetriever)) {
       _syncSmsRetriever();
     }
 

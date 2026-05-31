@@ -60,7 +60,6 @@ class Pinput extends StatefulWidget {
   /// Creates a [Pinput] widget.
   const Pinput({
     this.length = PinputConstants._defaultLength,
-    this.smsRetriever,
     this.defaultPinTheme,
     this.focusedPinTheme,
     this.submittedPinTheme,
@@ -134,7 +133,6 @@ class Pinput extends StatefulWidget {
   /// This gives you full control over each pin item widget.
   Pinput.builder({
     required PinItemWidgetBuilder builder,
-    this.smsRetriever,
     this.length = PinputConstants._defaultLength,
     this.onChanged,
     this.onCompleted,
@@ -227,12 +225,6 @@ class Pinput extends StatefulWidget {
 
   /// Displayed fields count. PIN code length.
   final int length;
-
-  /// Enables custom Android SMS autofill integration.
-  ///
-  /// Provide a [SmsRetriever] to listen for incoming SMS messages and extract
-  /// the one-time code. A common choice is the `smart_auth` package.
-  final SmsRetriever? smsRetriever;
 
   /// Fires when user completes pin input
   final ValueChanged<String>? onCompleted;
@@ -477,6 +469,10 @@ class Pinput extends StatefulWidget {
 
   @override
   State<Pinput> createState() => _PinputState();
+
+  /// Android platform variants override this to provide SMS Retriever support.
+  @protected
+  SmsRetriever? get androidSmsRetriever => null;
 
   /// Platform widget variants override this to provide toolkit-specific
   /// defaults while preserving explicit [defaultPinTheme] overrides.
