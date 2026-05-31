@@ -4,10 +4,7 @@ class _PinItem extends StatelessWidget {
   final _PinputState state;
   final int index;
 
-  const _PinItem({
-    required this.state,
-    required this.index,
-  });
+  const _PinItem({required this.state, required this.index});
 
   @override
   Widget build(BuildContext context) {
@@ -39,20 +36,25 @@ class _PinItem extends StatelessWidget {
       case PinItemStateType.initial:
         return _getDefaultPinTheme();
       case PinItemStateType.focused:
-        return _pinThemeOrDefault(state.widget.focusedPinTheme);
+        return state.widget.focusedPinTheme ??
+            state.widget.platformFocusedPinTheme(state.context);
       case PinItemStateType.submitted:
-        return _pinThemeOrDefault(state.widget.submittedPinTheme);
+        return state.widget.submittedPinTheme ??
+            state.widget.platformSubmittedPinTheme(state.context);
       case PinItemStateType.following:
         return _pinThemeOrDefault(state.widget.followingPinTheme);
       case PinItemStateType.disabled:
-        return _pinThemeOrDefault(state.widget.disabledPinTheme);
+        return state.widget.disabledPinTheme ??
+            state.widget.platformDisabledPinTheme(state.context);
       case PinItemStateType.error:
-        return _pinThemeOrDefault(state.widget.errorPinTheme);
+        return state.widget.errorPinTheme ??
+            state.widget.platformErrorPinTheme(state.context);
     }
   }
 
   PinTheme _getDefaultPinTheme() =>
-      state.widget.defaultPinTheme ?? PinputConstants._defaultPinTheme;
+      state.widget.defaultPinTheme ??
+      state.widget.platformDefaultPinTheme(state.context);
 
   PinTheme _pinThemeOrDefault(PinTheme? theme) =>
       theme ?? _getDefaultPinTheme();
@@ -114,15 +116,9 @@ class _PinItem extends StatelessWidget {
       case PinAnimationType.none:
         return child;
       case PinAnimationType.fade:
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
+        return FadeTransition(opacity: animation, child: child);
       case PinAnimationType.scale:
-        return ScaleTransition(
-          scale: animation,
-          child: child,
-        );
+        return ScaleTransition(scale: animation, child: child);
       case PinAnimationType.slide:
         return SlideTransition(
           position: Tween<Offset>(
@@ -133,10 +129,7 @@ class _PinItem extends StatelessWidget {
           child: child,
         );
       case PinAnimationType.rotation:
-        return RotationTransition(
-          turns: animation,
-          child: child,
-        );
+        return RotationTransition(turns: animation, child: child);
     }
   }
 }

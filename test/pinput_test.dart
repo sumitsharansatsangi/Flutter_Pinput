@@ -1,10 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pinput/pinput.dart';
 
 import 'helpers/helpers.dart';
 
 void main() {
+  testWidgets('Works without a Material ancestor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoPinput(
+            errorText: 'Invalid PIN',
+            forceErrorState: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoPinput), findsOneWidget);
+    expect(find.text('Invalid PIN'), findsOneWidget);
+  });
+
+  testWidgets('Platform variants provide distinct native defaults', (
+    WidgetTester tester,
+  ) async {
+    Future<Size> pinSize(Widget child) async {
+      await tester.pumpApp(child);
+      return tester.getSize(find.byType(AnimatedContainer).first);
+    }
+
+    expect(await pinSize(const CupertinoPinput()), const Size(52, 52));
+    expect(await pinSize(const MacosPinput()), const Size(44, 32));
+    expect(await pinSize(const FluentPinput()), const Size(48, 40));
+    expect(await pinSize(const YaruPinput()), const Size(48, 44));
+  });
+
+  testWidgets('Platform variants provide native focus accents', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = FocusNode();
+    await tester.pumpApp(MacosPinput(focusNode: focusNode));
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    final pin = tester.widget<AnimatedContainer>(
+      find.byType(AnimatedContainer).first,
+    );
+    final border = pin.decoration! as BoxDecoration;
+    expect((border.border! as Border).top.color, const Color(0xFF0A84FF));
+  });
+
   testWidgets('Pins are displayed', (WidgetTester tester) async {
     const length = 4;
     await tester.pumpApp(const Pinput(length: length));
@@ -14,8 +61,9 @@ void main() {
     expect(find.byType(Text), findsNWidgets(length));
   });
 
-  testWidgets('Non-centered layouts still use flexible pin items',
-      (WidgetTester tester) async {
+  testWidgets('Non-centered layouts still use flexible pin items', (
+    WidgetTester tester,
+  ) async {
     const length = 4;
     await tester.pumpApp(
       const Pinput(
@@ -107,8 +155,9 @@ void main() {
     testState(0, disabledTheme);
   });
 
-  testWidgets('Should properly handle focused state',
-      (WidgetTester tester) async {
+  testWidgets('Should properly handle focused state', (
+    WidgetTester tester,
+  ) async {
     final focusNode = FocusNode();
     const defaultTheme = PinTheme(decoration: BoxDecoration());
     final focusedTheme = defaultTheme.copyDecorationWith(color: Colors.red);
@@ -137,19 +186,15 @@ void main() {
   });
 
   testWidgets('Should display custom cursor', (WidgetTester tester) async {
-    await tester.pumpApp(
-      const Pinput(
-        autofocus: true,
-        cursor: FlutterLogo(),
-      ),
-    );
+    await tester.pumpApp(const Pinput(autofocus: true, cursor: FlutterLogo()));
 
     await tester.pump();
     expect(find.byType(FlutterLogo), findsOneWidget);
   });
 
-  testWidgets('Builder constructor renders error content',
-      (WidgetTester tester) async {
+  testWidgets('Builder constructor renders error content', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpApp(
       Pinput.builder(
         length: 4,
@@ -162,8 +207,9 @@ void main() {
     expect(find.text('Invalid PIN'), findsOneWidget);
   });
 
-  testWidgets('Builder constructor exposes initial pin item state',
-      (WidgetTester tester) async {
+  testWidgets('Builder constructor exposes initial pin item state', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpApp(
       Pinput.builder(
         length: 4,
@@ -178,8 +224,9 @@ void main() {
   });
 
   group('onChanged should work properly', () {
-    testWidgets('onChanged should work with controller',
-        (WidgetTester tester) async {
+    testWidgets('onChanged should work with controller', (
+      WidgetTester tester,
+    ) async {
       String? fieldValue;
       int called = 0;
 
@@ -210,8 +257,9 @@ void main() {
       expect(called, 2);
     });
 
-    testWidgets('onChanged should work with controller',
-        (WidgetTester tester) async {
+    testWidgets('onChanged should work with controller', (
+      WidgetTester tester,
+    ) async {
       String? fieldValue;
       int called = 0;
       final TextEditingController controller = TextEditingController();
@@ -248,8 +296,9 @@ void main() {
   });
 
   group('onCompleted should work properly', () {
-    testWidgets('onCompleted works without controller',
-        (WidgetTester tester) async {
+    testWidgets('onCompleted works without controller', (
+      WidgetTester tester,
+    ) async {
       String? fieldValue;
       int called = 0;
 
@@ -316,11 +365,7 @@ void main() {
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
 
-    await tester.pumpApp(
-      Pinput(
-        onTap: () => ++tapCount,
-      ),
-    );
+    await tester.pumpApp(Pinput(onTap: () => ++tapCount));
 
     expect(tapCount, 0);
     await tester.tap(find.byType(EditableText));
@@ -333,16 +378,12 @@ void main() {
     expect(tapCount, 3);
   });
 
-  testWidgets('onTap is not called, field is disabled',
-      (WidgetTester tester) async {
+  testWidgets('onTap is not called, field is disabled', (
+    WidgetTester tester,
+  ) async {
     int tapCount = 0;
 
-    await tester.pumpApp(
-      Pinput(
-        enabled: false,
-        onTap: () => ++tapCount,
-      ),
-    );
+    await tester.pumpApp(Pinput(enabled: false, onTap: () => ++tapCount));
 
     expect(tapCount, 0);
     await tester.tap(find.byType(EditableText), warnIfMissed: false);
@@ -353,11 +394,7 @@ void main() {
   testWidgets('onLongPress is called', (WidgetTester tester) async {
     int tapCount = 0;
 
-    await tester.pumpApp(
-      Pinput(
-        onLongPress: () => ++tapCount,
-      ),
-    );
+    await tester.pumpApp(Pinput(onLongPress: () => ++tapCount));
 
     expect(tapCount, 0);
     await tester.longPress(find.byType(EditableText));
@@ -373,11 +410,7 @@ void main() {
   testWidgets('onSubmitted callback is called', (WidgetTester tester) async {
     String? fieldValue;
 
-    await tester.pumpApp(
-      Pinput(
-        onSubmitted: (value) => fieldValue = value,
-      ),
-    );
+    await tester.pumpApp(Pinput(onSubmitted: (value) => fieldValue = value));
 
     expect(fieldValue, isNull);
 
@@ -386,8 +419,9 @@ void main() {
     expect(fieldValue, equals('123'));
   });
 
-  testWidgets('Validator error is cleared when pin changes after validation',
-      (WidgetTester tester) async {
+  testWidgets('Validator error is cleared when pin changes after validation', (
+    WidgetTester tester,
+  ) async {
     final controller = TextEditingController();
 
     await tester.pumpApp(
@@ -406,17 +440,13 @@ void main() {
     expect(find.text('Invalid PIN'), findsNothing);
   });
 
-  testWidgets('External errorText applies error theme',
-      (WidgetTester tester) async {
-    const errorTheme = PinTheme(
-      decoration: BoxDecoration(color: Colors.red),
-    );
+  testWidgets('External errorText applies error theme', (
+    WidgetTester tester,
+  ) async {
+    const errorTheme = PinTheme(decoration: BoxDecoration(color: Colors.red));
 
     await tester.pumpApp(
-      const Pinput(
-        errorText: 'Server error',
-        errorPinTheme: errorTheme,
-      ),
+      const Pinput(errorText: 'Server error', errorPinTheme: errorTheme),
     );
 
     expect(find.text('Server error'), findsOneWidget);

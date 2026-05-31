@@ -2,3 +2,4 @@
 library;
 
 export 'src/pinput.dart';
+export 'src/platform/platform_pinputs.dart';

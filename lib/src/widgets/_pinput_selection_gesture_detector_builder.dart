@@ -3,8 +3,8 @@ part of '../pinput.dart';
 class _PinputSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
   _PinputSelectionGestureDetectorBuilder({required _PinputState state})
-      : _state = state,
-        super(delegate: state);
+    : _state = state,
+      super(delegate: state);
 
   final _PinputState _state;
 
@@ -34,7 +34,7 @@ class _PinputSelectionGestureDetectorBuilder
   void onSingleLongTapStart(details) {
     super.onSingleLongTapStart(details);
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
+      switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           break;

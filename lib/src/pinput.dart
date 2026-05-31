@@ -50,9 +50,7 @@ part 'widgets/_pinput_selection_gesture_detector_builder.dart';
 /// - Close Keyboard After Completion
 /// - Beautiful [Examples](https://github.com/Tkko/Flutter_PinPut/tree/master/example/lib/demo)
 class _PinItemBuilder {
-  const _PinItemBuilder({
-    required this.itemBuilder,
-  });
+  const _PinItemBuilder({required this.itemBuilder});
 
   final PinItemWidgetBuilder itemBuilder;
 }
@@ -106,9 +104,7 @@ class Pinput extends StatefulWidget {
     this.keyboardAppearance,
     this.inputFormatters = const [],
     this.textInputAction,
-    this.autofillHints = const [
-      AutofillHints.oneTimeCode,
-    ],
+    this.autofillHints = const [AutofillHints.oneTimeCode],
     this.obscuringCharacter = '•',
     this.obscuringWidget,
     this.selectionControls,
@@ -126,13 +122,13 @@ class Pinput extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20),
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     super.key,
-  })  : assert(obscuringCharacter.length == 1),
-        assert(length > 0),
-        assert(
-          textInputAction != TextInputAction.newline,
-          'Pinput is not multiline',
-        ),
-        _builder = null;
+  }) : assert(obscuringCharacter.length == 1),
+       assert(length > 0),
+       assert(
+         textInputAction != TextInputAction.newline,
+         'Pinput is not multiline',
+       ),
+       _builder = null;
 
   /// Creates a [Pinput] widget with a custom pin item builder.
   /// This gives you full control over each pin item widget.
@@ -183,32 +179,30 @@ class Pinput extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20),
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     super.key,
-  })  : assert(length > 0),
-        assert(
-          textInputAction != TextInputAction.newline,
-          'Pinput is not multiline',
-        ),
-        _builder = _PinItemBuilder(
-          itemBuilder: builder,
-        ),
-        defaultPinTheme = null,
-        focusedPinTheme = null,
-        submittedPinTheme = null,
-        followingPinTheme = null,
-        disabledPinTheme = null,
-        errorPinTheme = null,
-        preFilledWidget = null,
-        pinContentAlignment = Alignment.center,
-        animationCurve = Curves.easeIn,
-        animationDuration = PinputConstants._animationDuration,
-        pinAnimationType = PinAnimationType.scale,
-        obscureText = false,
-        showCursor = false,
-        isCursorAnimationEnabled = false,
-        slideTransitionBeginOffset = null,
-        cursor = null,
-        obscuringCharacter = '•',
-        obscuringWidget = null;
+  }) : assert(length > 0),
+       assert(
+         textInputAction != TextInputAction.newline,
+         'Pinput is not multiline',
+       ),
+       _builder = _PinItemBuilder(itemBuilder: builder),
+       defaultPinTheme = null,
+       focusedPinTheme = null,
+       submittedPinTheme = null,
+       followingPinTheme = null,
+       disabledPinTheme = null,
+       errorPinTheme = null,
+       preFilledWidget = null,
+       pinContentAlignment = Alignment.center,
+       animationCurve = Curves.easeIn,
+       animationDuration = PinputConstants._animationDuration,
+       pinAnimationType = PinAnimationType.scale,
+       obscureText = false,
+       showCursor = false,
+       isCursorAnimationEnabled = false,
+       slideTransitionBeginOffset = null,
+       cursor = null,
+       obscuringCharacter = '•',
+       obscuringWidget = null;
 
   /// Theme of the pin in default state
   final PinTheme? defaultPinTheme;
@@ -484,6 +478,37 @@ class Pinput extends StatefulWidget {
   @override
   State<Pinput> createState() => _PinputState();
 
+  /// Platform widget variants override this to provide toolkit-specific
+  /// defaults while preserving explicit [defaultPinTheme] overrides.
+  @protected
+  PinTheme platformDefaultPinTheme(BuildContext context) =>
+      PinputConstants._defaultPinTheme;
+
+  /// Platform widget variants override this to provide native focus styling.
+  @protected
+  PinTheme platformFocusedPinTheme(BuildContext context) =>
+      platformDefaultPinTheme(context);
+
+  /// Platform widget variants override this to provide native submitted styling.
+  @protected
+  PinTheme platformSubmittedPinTheme(BuildContext context) =>
+      platformDefaultPinTheme(context);
+
+  /// Platform widget variants override this to provide native disabled styling.
+  @protected
+  PinTheme platformDisabledPinTheme(BuildContext context) =>
+      platformDefaultPinTheme(context);
+
+  /// Platform widget variants override this to provide native error styling.
+  @protected
+  PinTheme platformErrorPinTheme(BuildContext context) =>
+      platformDefaultPinTheme(context);
+
+  /// Platform widget variants override this to match native error colors.
+  @protected
+  TextStyle platformErrorTextStyle(BuildContext context) =>
+      const TextStyle(color: Color(0xFFD32F2F));
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -550,8 +575,9 @@ class Pinput extends StatefulWidget {
         defaultValue: null,
       ),
     );
-    properties
-        .add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: true));
+    properties.add(
+      DiagnosticsProperty<bool>('enabled', enabled, defaultValue: true),
+    );
     properties.add(
       DiagnosticsProperty<bool>(
         'closeKeyboardWhenCompleted',
@@ -678,8 +704,9 @@ class Pinput extends StatefulWidget {
         defaultValue: null,
       ),
     );
-    properties
-        .add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: true));
+    properties.add(
+      DiagnosticsProperty<bool>('enabled', enabled, defaultValue: true),
+    );
     properties.add(
       DiagnosticsProperty<bool>('readOnly', readOnly, defaultValue: false),
     );
@@ -708,11 +735,7 @@ class Pinput extends StatefulWidget {
       ),
     );
     properties.add(
-      DiagnosticsProperty<bool>(
-        'showCursor',
-        showCursor,
-        defaultValue: true,
-      ),
+      DiagnosticsProperty<bool>('showCursor', showCursor, defaultValue: true),
     );
     properties.add(
       DiagnosticsProperty<String>(
