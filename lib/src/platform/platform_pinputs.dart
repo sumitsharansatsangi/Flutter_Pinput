@@ -146,6 +146,24 @@ class MaterialPinput extends PlatformPinputBase {
 
   @override
   Color get errorColor => const Color(0xFFD32F2F);
+
+  @override
+  PinTheme platformDefaultPinTheme(BuildContext context) => PinTheme(
+    width: 56,
+    height: 60,
+    textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+    decoration: BoxDecoration(
+      color: surface(context, const Color(0xFFF3EDF7), const Color(0xFF2B2930)),
+      border: Border.all(
+        color: surface(
+          context,
+          const Color(0xFFCAC4D0),
+          const Color(0xFF49454F),
+        ),
+      ),
+      borderRadius: BorderRadius.circular(12),
+    ),
+  );
 }
 
 /// Cupertino-styled pin input for iOS applications.
